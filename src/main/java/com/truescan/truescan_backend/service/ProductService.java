@@ -2,7 +2,9 @@ package com.truescan.truescan_backend.service;
 import com.truescan.truescan_backend.model.Product;
 
 import com.truescan.truescan_backend.repository.ProductRepository;
+import com.truescan.truescan_backend.util.QRCodeHelper;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,5 +40,45 @@ public class ProductService {
         return repo.findAllByManufacturerEmail(email);
     }
 
+//    Delete a product
+    public boolean deleteProduct(String serialNumber) {
+        Optional<Product> product = repo.findBySerialNumber(serialNumber);
+
+        if(product.isPresent()) {
+            repo.delete(product.get());
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+
+//    Update product
+public Optional<Product> updateProduct(String serialNumber, Product updatedProduct) {
+    Optional<Product> existing = repo.findBySerialNumber(serialNumber);
+    if (existing.isPresent()) {
+        Product product = existing.get();
+        product.setName(updatedProduct.getName());
+        product.setAuthentic(updatedProduct.isAuthentic());
+        product.setManufacturerEmail(updatedProduct.getManufacturerEmail());
+        product.setManufacturerCompany(updatedProduct.getManufacturerCompany());
+
+        return Optional.of(repo.save(product));
+    }
+    return Optional.empty();
+}
+
+//    verifies incoming qrcode from frontend
+@Autowired
+    QRCodeHelper qrCodeHelper;
+public Optional<Product> verifyProductFromQRCode(String serial, String timestamp, String signature) {
+        Optional<Product> product = checkProduct(serial);
+
+        if (product.isEmpty()) return Optional.empty();
+
+        boolean isValid = qrCodeHelper.isSignatureValid(serial, timestamp, signature);
+        return isValid ? product : Optional.empty();
+    }
 
 }

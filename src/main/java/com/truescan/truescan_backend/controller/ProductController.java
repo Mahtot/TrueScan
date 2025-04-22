@@ -1,8 +1,12 @@
 package com.truescan.truescan_backend.controller;
 
+import com.truescan.truescan_backend.dto.QRCodeVerificationRequest;
+import com.truescan.truescan_backend.dto.QRCodeVerificationResponse;
 import com.truescan.truescan_backend.model.ErrorResponse;
 import com.truescan.truescan_backend.model.Product;
 import com.truescan.truescan_backend.service.ProductService;
+import com.truescan.truescan_backend.util.QRCodeHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +64,104 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+//    Deleting a product
+    @DeleteMapping("/{serial}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable String serial) {
+        boolean deleted = service.deleteProduct(serial);
+
+        if(deleted) {
+            return ResponseEntity.ok().body("Product with serial number " + serial + " deleted successfully.");
+        } else {
+            ErrorResponse errorResponse = new ErrorResponse("PRODUCT_NOT_FOUND", "Product with serial number " + serial + " not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+    }
+
+//Update a product
+@PutMapping("/{serial}")
+public ResponseEntity<Object> updateProduct(@PathVariable String serial, @RequestBody Product updatedProduct) {
+    Optional<Product> updated = service.updateProduct(serial, updatedProduct);
+
+    if (updated.isPresent()) {
+        return ResponseEntity.ok(updated.get());
+    } else {
+        ErrorResponse errorResponse = new ErrorResponse("PRODUCT_NOT_FOUND", "Product with serial number " + serial + " not found.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+}
 
 
+// Generate a QR Code
+@Autowired   //create an instance of the QRCodeHelper class
+private QRCodeHelper qrCodeHelper;
+
+    @GetMapping("/{serial}/qrcode")
+    public ResponseEntity<?> generateQRCode(@PathVariable String serial) {
+        Optional<Product> product = service.checkProduct(serial);
+
+        if (product.isEmpty()) {
+            ErrorResponse error = new ErrorResponse("PRODUCT_NOT_FOUND", "No product with serial: " + serial);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+        try {
+            String qrBase64 = qrCodeHelper.generateQRCodeBase64(serial, 300, 300);
+            return ResponseEntity.ok().body(qrBase64);
+        } catch (Exception e) {
+            ErrorResponse error = new ErrorResponse("QR_GENERATION_FAILED", "Could not generate QR code.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyQRCode(@RequestBody QRCodeVerificationRequest request) {
+        // Step 1: Check if the request body contains required fields
+        if (request.getSerial() == null || request.getSerial().isEmpty() ||
+                request.getTimestamp() == null || request.getTimestamp().isEmpty() ||
+                request.getSignature() == null || request.getSignature().isEmpty()) {
+
+            // Return error response if any required field is missing
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new QRCodeVerificationResponse(
+                            false,
+                            "Error: Missing QR code data. Please provide serial, timestamp, and signature.",
+                            null, null, null, null
+                    )
+            );
+        }
+
+        // Step 2: Call the service to verify the product from the QR code
+        Optional<Product> product = service.verifyProductFromQRCode(
+                request.getSerial(),
+                request.getTimestamp(),
+                request.getSignature()
+        );
+
+        // Step 3: Check if the product is found after verification
+        if (product.isPresent()) {
+            Product p = product.get();
+            return ResponseEntity.ok(new QRCodeVerificationResponse(
+                    true,
+                    "Product is authentic.",
+                    p.getName(),
+                    p.getSerialNumber(),
+                    p.getManufacturerCompany(),
+                    p.getManufacturerEmail()
+            ));
+        } else {
+            // Step 4: Return unauthorized response if product is not found or signature is invalid
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new QRCodeVerificationResponse(
+                            false,
+                            "Invalid or tampered QR code. Product could not be verified.",
+                            null,
+                            null,
+                            null,
+                            null
+                    )
+            );
+        }
+    }
 
 }

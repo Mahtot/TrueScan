@@ -17,6 +17,7 @@ public class Product {
     private String name;
     private String serialNumber;
     private String manufacturerEmail;
+    private String manufacturerCompany;
     private boolean isAuthentic;
     private LocalDateTime registeredAt;
 }
