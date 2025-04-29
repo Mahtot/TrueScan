@@ -17,7 +17,7 @@ public class JwtService {
     @Value("${app.jwt.expirationMs}")
     private int jwtExpirationMs;
 
-    // 👑 Generate a new JWT token
+    //  Generate a new JWT token
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
@@ -27,12 +27,12 @@ public class JwtService {
                 .compact();
     }
 
-    // 🔑 Extract username (email) from the token
+    //  Extract username (email) from the token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // 🔒 Validate the JWT token
+    //  Validate the JWT token
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
@@ -45,7 +45,7 @@ public class JwtService {
         return claimsResolver.resolve(claims);
     }
 
-    // 🛡️ Extract all claims (payload) from the JWT token
+    // ️ Extract all claims (payload) from the JWT token
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(jwtSecret)
@@ -54,12 +54,12 @@ public class JwtService {
                 .getBody();
     }
 
-    // ⏳ Check if the token is expired
+    //  Check if the token is expired
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    // 📅 Extract the expiration date from the token
+    //  Extract the expiration date from the token
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }

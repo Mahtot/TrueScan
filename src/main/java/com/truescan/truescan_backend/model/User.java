@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.time.LocalDateTime;
 
 @Document(collection = "users")
 @Data // generates getters and setters
@@ -25,4 +26,9 @@ public class User {
 
 //    Role could be "MANUFACTURER", "ADMIN"
     private String role;
+
+    private boolean enabled = false;  // new users are disabled
+    private String otpCode;           // 6-digit code we send to email
+    private LocalDateTime otpExpiry;           // expiry time for the code
+
 }
