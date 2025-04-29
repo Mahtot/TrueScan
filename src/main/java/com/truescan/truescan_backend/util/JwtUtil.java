@@ -27,12 +27,12 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 🔍 Extract email (username)
+    //  Extract email (username)
     public String extractEmail(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
     }
 
-    // 🔐 Validate token
+    //  Validate token
     public boolean isTokenValid(String token, User user) {
         String email = extractEmail(token);
         return (email.equals(user.getEmail()) && !isTokenExpired(token));

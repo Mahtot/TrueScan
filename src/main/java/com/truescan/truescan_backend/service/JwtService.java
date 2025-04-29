@@ -39,7 +39,7 @@ public class JwtService {
     }
 
 
-    // 🕵️ Extract claims from the JWT token
+    // 🕵 Extract claims from the JWT token
     public <T> T extractClaim(String token, ClaimsResolver<T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.resolve(claims);

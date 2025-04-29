@@ -14,7 +14,6 @@ public class CustomUserDetails implements UserDetails {
     private String password;
     private List<GrantedAuthority> authorities;
 
-    // Constructor that takes the custom User object
     public CustomUserDetails(User user) {
         this.email = user.getEmail();
         this.password = user.getPassword();

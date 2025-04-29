@@ -5,6 +5,7 @@ import com.truescan.truescan_backend.repository.ProductRepository;
 import com.truescan.truescan_backend.util.QRCodeHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,9 +37,9 @@ public class ProductService {
         return repo.findBySerialNumber(serialNumber);
     }
 
-    public List<Product> getProductsByManufacturerEmail(String email) {
-        return repo.findAllByManufacturerEmail(email);
-    }
+    public List<Product> getProductsForAuthenticatedManufacturer() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return repo.findAllByManufacturerEmail(email);    }
 
 //    Delete a product
     public boolean deleteProduct(String serialNumber) {

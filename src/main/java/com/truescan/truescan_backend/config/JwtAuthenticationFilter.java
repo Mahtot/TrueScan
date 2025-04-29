@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.List;
+
 
 @Component
 @RequiredArgsConstructor
@@ -57,12 +60,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Check if the JWT is valid
             if (jwtService.isTokenValid(jwt, userDetails)) {
-                // Create an authentication token for the user
+                // Extract the role from the token
+                String role = jwtService.extractClaim(jwt, claims -> claims.get("role", String.class));
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
-                        null, // No credentials are needed, as the JWT has already validated the user
-                        userDetails.getAuthorities() // Set the user's authorities (roles)
+                        null,
+                        List.of(new SimpleGrantedAuthority(role)) //  Give authority based on role
                 );
+
 
                 // Set the details for the authentication token
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

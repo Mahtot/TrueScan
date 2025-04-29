@@ -24,11 +24,11 @@ public class User {
     private String password;
     private String companyName;
 
-//    Role could be "MANUFACTURER", "ADMIN"
+//    Role could be "MANUFACTURER", "ADMIN", "EndUser"
     private String role;
 
     private boolean enabled = false;  // new users are disabled
     private String otpCode;           // 6-digit code we send to email
-    private LocalDateTime otpExpiry;           // expiry time for the code
+    private LocalDateTime otpExpiry;
 
 }

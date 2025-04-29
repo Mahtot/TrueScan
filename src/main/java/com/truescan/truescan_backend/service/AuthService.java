@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -31,6 +32,12 @@ public class AuthService {
 
     public String register(RegisterRequest request) {
         System.out.println("Reached register endpoint");
+
+        // Check if user already exists
+        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+        if (existingUser.isPresent()) {
+            throw new InvalidCredentialsException("A user with this email already exists.");
+        }
 
         User user = new User();
         user.setEmail(request.getEmail());

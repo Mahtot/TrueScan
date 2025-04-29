@@ -9,13 +9,14 @@ import com.truescan.truescan_backend.util.QRCodeHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/products")
 public class ProductController {
 
     private final ProductService service;
@@ -25,6 +26,7 @@ public class ProductController {
     }
 
     // Register Product
+    @PreAuthorize("hasAuthority('Manufacturer')")
     @PostMapping
     public ResponseEntity<?> addProduct(@RequestBody Product product) {
         try {
@@ -36,6 +38,7 @@ public class ProductController {
     }
 
 //  Get product
+    @PreAuthorize("hasAuthority('Manufacturer')")
     @GetMapping("/{serial}")
     public ResponseEntity<Object> getProduct(@PathVariable String serial) {
         // Attempt to retrieve the product by serial number
@@ -51,20 +54,21 @@ public class ProductController {
         }
     }
 
-//    Get Products by email
     @GetMapping
-    public ResponseEntity<?> getProductsByEmail(@RequestParam String email) {
-        List<Product> products = service.getProductsByManufacturerEmail(email);
+    public ResponseEntity<?> getProductsForUser() {
+        List<Product> products = service.getProductsForAuthenticatedManufacturer();
 
         if (products.isEmpty()) {
-            ErrorResponse errorResponse = new ErrorResponse("NO_PRODUCTS_FOUND", "No products found for email: " + email);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            ErrorResponse error = new ErrorResponse("NO_PRODUCTS_FOUND", "No products found for your account.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
         return ResponseEntity.ok(products);
     }
 
+
 //    Deleting a product
+    @PreAuthorize("hasAuthority('Manufacturer')")
     @DeleteMapping("/{serial}")
     public ResponseEntity<Object> deleteProduct(@PathVariable String serial) {
         boolean deleted = service.deleteProduct(serial);
@@ -78,6 +82,7 @@ public class ProductController {
     }
 
 //Update a product
+@PreAuthorize("hasAuthority('Manufacturer')")
 @PutMapping("/{serial}")
 public ResponseEntity<Object> updateProduct(@PathVariable String serial, @RequestBody Product updatedProduct) {
     Optional<Product> updated = service.updateProduct(serial, updatedProduct);
@@ -92,9 +97,10 @@ public ResponseEntity<Object> updateProduct(@PathVariable String serial, @Reques
 
 
 // Generate a QR Code
+
 @Autowired   //create an instance of the QRCodeHelper class
 private QRCodeHelper qrCodeHelper;
-
+    @PreAuthorize("hasAuthority('Manufacturer')")
     @GetMapping("/{serial}/qrcode")
     public ResponseEntity<?> generateQRCode(@PathVariable String serial) {
         Optional<Product> product = service.checkProduct(serial);
@@ -113,7 +119,7 @@ private QRCodeHelper qrCodeHelper;
         }
     }
 
-
+    @PreAuthorize("hasAuthority('EndUser')")
     @PostMapping("/verify")
     public ResponseEntity<?> verifyQRCode(@RequestBody QRCodeVerificationRequest request) {
         // Step 1: Check if the request body contains required fields
