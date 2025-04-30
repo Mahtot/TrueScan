@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -55,4 +56,16 @@ public class UserService {
             return true;
         }).orElse(false);
     }
+
+    public List<User> getUsersByRole(String role) {
+        return userRepository.findAllByRole(role);
+    }
+
+    public boolean deleteUserByEmail(String email) {
+        return userRepository.findByEmail(email).map(user -> {
+            userRepository.delete(user);
+            return true;
+        }).orElse(false);
+    }
+
 }

@@ -82,4 +82,10 @@ public Optional<Product> verifyProductFromQRCode(String serial, String timestamp
         return isValid ? product : Optional.empty();
     }
 
+
+    public List<Product> getAllProducts() {
+        return repo.findAll();
+    }
+
+
 }

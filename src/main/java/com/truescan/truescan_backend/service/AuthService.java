@@ -33,6 +33,10 @@ public class AuthService {
     public String register(RegisterRequest request) {
         System.out.println("Reached register endpoint");
 
+        if (request.getRole().equalsIgnoreCase("ADMIN")) {
+            throw new InvalidCredentialsException("Registration as ADMIN is not allowed.");
+        }
+
         // Check if user already exists
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
