@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# But not the final build artifacts
+!target/*.jar
+
 ### STS ###
 .apt_generated
 .classpath
