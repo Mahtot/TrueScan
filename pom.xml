@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>23</java.version>
+		<java.version>21</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -70,11 +70,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.truescan</groupId>
-			<artifactId>truescan-backend</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.truescan</groupId>-->
+<!--			<artifactId>truescan-backend</artifactId>-->
+<!--			<version>0.0.1-SNAPSHOT</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -97,6 +97,12 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>4.6.0</version>
+			<scope>test</scope> <!-- Typically, Mockito is only needed for tests -->
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -112,9 +118,9 @@
 							<version>${lombok.version}</version>
 						</path>
 					</annotationProcessorPaths>
-					<source>23</source>
-					<target>23</target>
-					<compilerArgs>--enable-preview</compilerArgs>
+					<source>21</source>
+					<target>21</target>
+<!--					<compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
 				</configuration>
 			</plugin>
 			<plugin>

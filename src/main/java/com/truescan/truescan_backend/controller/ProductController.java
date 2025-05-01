@@ -119,15 +119,12 @@ private QRCodeHelper qrCodeHelper;
         }
     }
 
-    @PreAuthorize("hasAuthority('EndUser')")
     @PostMapping("/verify")
     public ResponseEntity<?> verifyQRCode(@RequestBody QRCodeVerificationRequest request) {
-        // Step 1: Check if the request body contains required fields
         if (request.getSerial() == null || request.getSerial().isEmpty() ||
                 request.getTimestamp() == null || request.getTimestamp().isEmpty() ||
                 request.getSignature() == null || request.getSignature().isEmpty()) {
 
-            // Return error response if any required field is missing
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new QRCodeVerificationResponse(
                             false,
@@ -137,14 +134,12 @@ private QRCodeHelper qrCodeHelper;
             );
         }
 
-        // Step 2: Call the service to verify the product from the QR code
         Optional<Product> product = service.verifyProductFromQRCode(
                 request.getSerial(),
                 request.getTimestamp(),
                 request.getSignature()
         );
 
-        // Step 3: Check if the product is found after verification
         if (product.isPresent()) {
             Product p = product.get();
             return ResponseEntity.ok(new QRCodeVerificationResponse(
