@@ -37,11 +37,25 @@ public class AuthService {
             throw new InvalidCredentialsException("Registration as ADMIN is not allowed.");
         }
 
-        // Check if user already exists
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
-            throw new InvalidCredentialsException("A user with this email already exists.");
+            User existing = existingUser.get();
+            if (existing.isEnabled()) {
+                throw new InvalidCredentialsException("A user with this email already exists.");
+            }
+
+
+            if (existing.getOtpExpiry() != null && existing.getOtpExpiry().isBefore(LocalDateTime.now())) {
+                existing.setOtpCode(generateOtpCode());
+                existing.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+                emailService.sendOtpEmail(existing.getEmail(), existing.getOtpCode());
+                userRepository.save(existing);
+                return "OTP re-sent to your email.";
+            }
+
+            throw new InvalidCredentialsException("OTP still valid. Please check your email.");
         }
+
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -89,6 +103,7 @@ public class AuthService {
                 .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
         if (user.getOtpCode() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+            user = null;
             throw new InvalidCredentialsException("OTP expired. Please register again.");
         }
 
