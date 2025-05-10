@@ -3,6 +3,7 @@ com\truescan\truescan_backend\model\ErrorResponse.class
 com\truescan\truescan_backend\config\JwtAuthenticationFilter.class
 com\truescan\truescan_backend\controller\AdminController.class
 com\truescan\truescan_backend\config\JwtAuthenticationProvider.class
+com\truescan\truescan_backend\config\WebConfig$1.class
 com\truescan\truescan_backend\controller\ManufacturerController.class
 com\truescan\truescan_backend\security\CustomUserDetailsService.class
 com\truescan\truescan_backend\TruescanBackendApplication.class
@@ -17,6 +18,7 @@ com\truescan\truescan_backend\service\UserService.class
 com\truescan\truescan_backend\service\ProductService.class
 com\truescan\truescan_backend\model\Product.class
 com\truescan\truescan_backend\service\AuthService.class
+com\truescan\truescan_backend\config\WebConfig.class
 com\truescan\truescan_backend\controller\AuthController.class
 com\truescan\truescan_backend\service\EmailService.class
 com\truescan\truescan_backend\service\JwtService.class

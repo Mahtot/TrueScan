@@ -3,6 +3,7 @@ C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-bac
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\config\JwtAuthenticationFilter.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\config\JwtAuthenticationProvider.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\config\SecurityConfig.java
+C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\config\WebConfig.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\controller\AdminController.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\controller\AuthController.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\controller\ManufacturerController.java
