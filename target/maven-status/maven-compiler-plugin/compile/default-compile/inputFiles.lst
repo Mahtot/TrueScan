@@ -8,6 +8,7 @@ C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-bac
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\controller\AuthController.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\controller\ManufacturerController.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\controller\ProductController.java
+C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\dto\ApiResponse.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\dto\QRCodeVerificationRequest.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\dto\QRCodeVerificationResponse.java
 C:\Users\mahto\Documents\Academics\5th yr\TrueScan\truescan-backend\truescan-backend\src\main\java\com\truescan\truescan_backend\dto\RegisterRequest.java

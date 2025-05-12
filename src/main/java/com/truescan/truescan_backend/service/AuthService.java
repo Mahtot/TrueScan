@@ -1,13 +1,17 @@
 package com.truescan.truescan_backend.service;
 
+import com.truescan.truescan_backend.dto.ApiResponse;
 import com.truescan.truescan_backend.dto.RegisterRequest;
 import com.truescan.truescan_backend.exception.InvalidCredentialsException;
 import com.truescan.truescan_backend.model.User;
 import com.truescan.truescan_backend.repository.UserRepository;
 import com.truescan.truescan_backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -30,32 +34,41 @@ public class AuthService {
 
     private LocalDateTime otpExpiry;
 
-    public String register(RegisterRequest request) {
+
+    public ResponseEntity<ApiResponse<String>> register( RegisterRequest request) {
         System.out.println("Reached register endpoint");
 
         if (request.getRole().equalsIgnoreCase("ADMIN")) {
-            throw new InvalidCredentialsException("Registration as ADMIN is not allowed.");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, "Registration as ADMIN is not allowed.", null));
         }
 
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
             User existing = existingUser.get();
-            if (existing.isEnabled()) {
-                throw new InvalidCredentialsException("A user with this email already exists.");
-            }
 
+            if (existing.isEnabled()) {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new ApiResponse<>(false, "A user with this email already exists.", null));
+            }
 
             if (existing.getOtpExpiry() != null && existing.getOtpExpiry().isBefore(LocalDateTime.now())) {
                 existing.setOtpCode(generateOtpCode());
                 existing.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
                 emailService.sendOtpEmail(existing.getEmail(), existing.getOtpCode());
                 userRepository.save(existing);
-                return "OTP re-sent to your email.";
+
+                return ResponseEntity.ok(
+                        new ApiResponse<>(true, "OTP re-sent to your email.", null)
+                );
             }
 
-            throw new InvalidCredentialsException("OTP still valid. Please check your email.");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, "OTP still valid. Please check your email.", null));
         }
-
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -70,27 +83,41 @@ public class AuthService {
         user.setEnabled(false);
 
         userRepository.save(user);
-
         emailService.sendOtpEmail(user.getEmail(), otpCode);
 
-        return "OTP sent to email. Please verify.";
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(true, "OTP sent to email. Please verify.", null));
     }
 
 
-    //  Login
-    public String login(String email, String password) {
+    public ResponseEntity<ApiResponse<String>> login( String email, String password) {
         System.out.println("Reached login endpoint");
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new InvalidCredentialsException("User not found"));
+        try {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
-        if (!user.isEnabled()) {
-            throw new InvalidCredentialsException("Please verify your email first.");
-        }
+            if (!user.isEnabled()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>(false, "Please verify your email first.", null));
+            }
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid email or password");
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>(false, "Invalid email or password.", null));
+            }
+
+            String jwtToken = jwtUtil.generateToken(user);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Login successful", jwtToken));
+
+        } catch (InvalidCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Login failed due to an unexpected error", null));
         }
-        return jwtUtil.generateToken(user);
     }
 
     private String generateOtpCode() {
@@ -98,17 +125,19 @@ public class AuthService {
         return String.valueOf(otp);
     }
 
-    public String verifyOtp(String email, String otpCode) {
+    public  ResponseEntity<ApiResponse<String>>  verifyOtp(String email, String otpCode) {
+ try{
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
-        if (user.getOtpCode() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
-            user = null;
-            throw new InvalidCredentialsException("OTP expired. Please register again.");
+        if(user.getOtpCode() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<>(false, "OTP expired. Please register again.", null));
         }
 
         if (!user.getOtpCode().equals(otpCode)) {
-            throw new InvalidCredentialsException("Invalid OTP code.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, "Invalid OTP code.", null));
         }
 
         user.setEnabled(true);
@@ -116,7 +145,16 @@ public class AuthService {
         user.setOtpExpiry(null);
         userRepository.save(user);
 //       Generate token after successful verification
-        return jwtUtil.generateToken(user);
-    }
+        String jwt = jwtUtil.generateToken(user);
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "OTP verified successfully", jwt));
+
+    } catch (InvalidCredentialsException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, e.getMessage(), null));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse<>(false, "Something went wrong while verifying OTP", null));
+    }    }
 
 }

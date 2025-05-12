@@ -1,5 +1,6 @@
 package com.truescan.truescan_backend.controller;
 
+import com.truescan.truescan_backend.dto.ApiResponse;
 import com.truescan.truescan_backend.dto.RegisterRequest;
 import com.truescan.truescan_backend.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,20 +17,21 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        String token = authService.register(request);
-        return ResponseEntity.ok(Map.of("message", token));
+       return authService.register(request);
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        String token = authService.login(request.get("email"), request.get("password"));
-        return ResponseEntity.ok(Map.of("token", token));
+    public ResponseEntity<ApiResponse<String>> login(@RequestBody Map<String, String> request) {
+        return authService.login(request.get("email"), request.get("password"));
+
     }
 
     @PostMapping("/verify-otp")
-    public String verifyOtp(@RequestParam String email, @RequestParam String otp) {
+    public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestParam String email, @RequestParam String otp) {
         return authService.verifyOtp(email, otp);
     }
+
 
 
 
