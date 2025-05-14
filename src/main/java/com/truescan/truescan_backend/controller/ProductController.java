@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -31,13 +33,30 @@ public class ProductController {
     public ResponseEntity<?> addProduct(@RequestBody Product product) {
         try {
             Product created = service.addProduct(product);
-            return ResponseEntity.ok(created);
+
+            // Generate QR Code using the product's serial number
+            String qrBase64 = qrCodeHelper.generateQRCodeBase64(created.getSerialNumber(), 300, 300);
+
+            // Construct response with product and QR
+            Map<String, Object> response = new HashMap<>();
+            response.put("product", created);
+            response.put("qrCode", qrBase64);
+
+            return ResponseEntity.ok(response);
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("DUPLICATE_SERIAL", e.getMessage()));
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("DUPLICATE_SERIAL", e.getMessage())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("QR_GENERATION_FAILED", "Failed to generate QR code.")
+            );
         }
     }
 
-//  Get product
+
+    //  Get product
     @PreAuthorize("hasAuthority('Manufacturer')")
     @GetMapping("/{serial}")
     public ResponseEntity<Object> getProduct(@PathVariable String serial) {
@@ -102,6 +121,7 @@ public ResponseEntity<Object> updateProduct(@PathVariable String serial, @Reques
 private QRCodeHelper qrCodeHelper;
     @PreAuthorize("hasAuthority('Manufacturer')")
     @GetMapping("/{serial}/qrcode")
+
     public ResponseEntity<?> generateQRCode(@PathVariable String serial) {
         Optional<Product> product = service.checkProduct(serial);
 
