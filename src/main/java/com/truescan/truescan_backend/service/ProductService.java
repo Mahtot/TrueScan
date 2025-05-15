@@ -55,20 +55,29 @@ public class ProductService {
     }
 
 
-//    Update product
-public Optional<Product> updateProduct(String serialNumber, Product updatedProduct) {
-    Optional<Product> existing = repo.findBySerialNumber(serialNumber);
-    if (existing.isPresent()) {
-        Product product = existing.get();
-        product.setName(updatedProduct.getName());
-        product.setAuthentic(updatedProduct.isAuthentic());
-        product.setManufacturerEmail(updatedProduct.getManufacturerEmail());
-        product.setManufacturerCompany(updatedProduct.getManufacturerCompany());
+    public Optional<Product> updateProduct(String serialNumber, Product updatedProduct) {
+        Optional<Product> existing = repo.findBySerialNumber(serialNumber);
+        if (existing.isPresent()) {
+            Product product = existing.get();
 
-        return Optional.of(repo.save(product));
+            if (updatedProduct.getName() != null) {
+                product.setName(updatedProduct.getName());
+            }
+
+            if (updatedProduct.getManufacturerCompany() != null) {
+                product.setManufacturerCompany(updatedProduct.getManufacturerCompany());
+            }
+
+            if (updatedProduct.getManufacturerEmail() != null) {
+                product.setManufacturerEmail(updatedProduct.getManufacturerEmail());
+            }
+
+
+            return Optional.of(repo.save(product));
+        }
+        return Optional.empty();
     }
-    return Optional.empty();
-}
+
 
 //    verifies incoming qrcode from frontend
 @Autowired

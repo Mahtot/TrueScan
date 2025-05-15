@@ -32,7 +32,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        DefaultSecurityFilterChain build = http
+        return http
                 .cors() // ✅ enable CORS
                 .and()
                 .csrf(csrf -> csrf.disable())
@@ -46,7 +46,6 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-        return build;
     }
 
     @Bean
