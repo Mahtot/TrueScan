@@ -5,11 +5,14 @@ import com.truescan.truescan_backend.model.User;
 import com.truescan.truescan_backend.service.ProductService;
 import com.truescan.truescan_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @PreAuthorize("hasAuthority('ADMIN')")
@@ -29,7 +32,11 @@ public class AdminController {
     @DeleteMapping("/manufacturer/{email}")
     public ResponseEntity<?> deleteManufacturer(@PathVariable String email) {
         boolean deleted = userService.deleteUserByEmail(email);
-        return deleted ? ResponseEntity.ok("Deleted.") : ResponseEntity.notFound().build();
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Product deleted successfully");
+
+
+        return deleted ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/products")
@@ -40,6 +47,9 @@ public class AdminController {
     @DeleteMapping("/product/{serial}")
     public ResponseEntity<?> deleteProduct(@PathVariable String serial) {
         boolean deleted = productService.deleteProduct(serial);
-        return deleted ? ResponseEntity.ok("Deleted.") : ResponseEntity.notFound().build();
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Product deleted successfully");
+
+        return deleted ? ResponseEntity.ok(response): ResponseEntity.status(HttpStatus.NOT_FOUND).body("PRODUCT NOT FOUND");
     }
 }
