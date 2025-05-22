@@ -52,7 +52,7 @@ public class QRCodeHelper {
 
     private String generateSignature(String serial, String timestamp) {
         try {
-            String data = serial + timestamp + secretKey;
+            String data = serial + timestamp;
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
@@ -80,7 +80,7 @@ public class QRCodeHelper {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
             String generatedSignature = Base64.getEncoder().encodeToString(hash);
-            System.out.println("🔍 Verifying signature:");
+            System.out.println("Verifying signature:");
             System.out.println("Serial: " + serial);
             System.out.println("Timestamp: " + timestamp);
             System.out.println("Expected Signature: " + generatedSignature);
