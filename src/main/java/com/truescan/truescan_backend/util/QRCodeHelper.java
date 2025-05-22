@@ -76,7 +76,7 @@ public class QRCodeHelper {
 //    This one checks the signature
     public boolean isSignatureValid(String serial, String timestamp, String providedSignature) {
         try {
-            String data = serial + timestamp + secretKey;
+            String data = serial + timestamp;
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
             String generatedSignature = Base64.getEncoder().encodeToString(hash);
