@@ -38,6 +38,7 @@ public class ProductService {
     @Value("${contract.private.key}")
     private String PRIVATE_KEY;
 
+
     public ProductService(ProductRepository repo) {
         this.repo = repo;
         this.web3j = Web3j.build(new HttpService("https://sepolia.infura.io/v3/e749827f832b46278476e9266b39ed84"));
