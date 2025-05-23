@@ -1,5 +1,6 @@
 package com.truescan.truescan_backend.service;
 import com.truescan.contracts.ProductVerifier;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.web3j.crypto.Hash;
 import org.web3j.protocol.Web3j;
@@ -29,8 +30,8 @@ import java.util.Optional;
 @Service
 public class ProductService {
     private final ProductRepository repo;
-    private  Web3j web3j;
-    private  ProductVerifier contract;
+    private Web3j web3j;
+    private ProductVerifier contract;
 
     @Value("${contract.productVerifierAddress}")
     private String CONTRACT_ADDRESS;
@@ -38,15 +39,18 @@ public class ProductService {
     @Value("${contract.private.key}")
     private String PRIVATE_KEY;
 
+    @Autowired
+    QRCodeHelper qrCodeHelper;
 
     public ProductService(ProductRepository repo) {
         this.repo = repo;
+    }
+
+    @PostConstruct
+    private void init() {
         this.web3j = Web3j.build(new HttpService("https://sepolia.infura.io/v3/e749827f832b46278476e9266b39ed84"));
-
         Credentials credentials = Credentials.create(PRIVATE_KEY);
-
         this.contract = ProductVerifier.load(CONTRACT_ADDRESS, web3j, credentials, new DefaultGasProvider());
-
     }
 
     public Product addProduct(Product product) {
@@ -121,8 +125,6 @@ public class ProductService {
 
 
 //    verifies incoming qrcode from frontend
-@Autowired
-    QRCodeHelper qrCodeHelper;
 public Optional<Product> verifyProductFromQRCode(String serial, String timestamp, String signature) {
         Optional<Product> product = checkProduct(serial);
 
