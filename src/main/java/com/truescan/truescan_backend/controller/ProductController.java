@@ -117,7 +117,7 @@ public ResponseEntity<Object> updateProduct(@PathVariable String serial, @Reques
 
 // Generate a QR Code
 
-@Autowired   //create an instance of the QRCodeHelper class
+@Autowired   //creates an instance of the QRCodeHelper class
 private QRCodeHelper qrCodeHelper;
     @PreAuthorize("hasAuthority('Manufacturer')")
     @GetMapping("/{serial}/qrcode")
@@ -154,6 +154,7 @@ private QRCodeHelper qrCodeHelper;
             );
         }
 
+        // First verify off-chain data integrity (your existing logic)
         Optional<Product> product = service.verifyProductFromQRCode(
                 request.getSerial(),
                 request.getTimestamp(),
@@ -161,25 +162,34 @@ private QRCodeHelper qrCodeHelper;
         );
 
         if (product.isPresent()) {
-            Product p = product.get();
-            return ResponseEntity.ok(new QRCodeVerificationResponse(
-                    true,
-                    "Product is authentic.",
-                    p.getName(),
-                    p.getSerialNumber(),
-                    p.getManufacturerCompany(),
-                    p.getManufacturerEmail()
-            ));
+            // Now verify on-chain using smart contract
+            boolean isOnChainValid = service.verifyProductOnChain(request.getSerial());
+
+            if (isOnChainValid) {
+                Product p = product.get();
+                return ResponseEntity.ok(new QRCodeVerificationResponse(
+                        true,
+                        "Product is authentic and verified on blockchain.",
+                        p.getName(),
+                        p.getSerialNumber(),
+                        p.getManufacturerCompany(),
+                        p.getManufacturerEmail()
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                        new QRCodeVerificationResponse(
+                                false,
+                                "Product verification failed on blockchain.",
+                                null, null, null, null
+                        )
+                );
+            }
         } else {
-            // Step 4: Return unauthorized response if product is not found or signature is invalid
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new QRCodeVerificationResponse(
                             false,
                             "Invalid or tampered QR code. Product could not be verified.",
-                            null,
-                            null,
-                            null,
-                            null
+                            null, null, null, null
                     )
             );
         }
