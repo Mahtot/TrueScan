@@ -80,6 +80,8 @@ public class ProductService {
 
             // Register on blockchain
             TransactionReceipt receipt = contract.registerProduct(fullHash).send();
+            System.out.println("Tx status: " + receipt.getStatus()); // Should be "0x1"
+            System.out.println("Tx hash: " + receipt.getTransactionHash());
 
             if (!receipt.isStatusOK()) {
                 throw new RuntimeException("Blockchain transaction failed: " + receipt.getStatus());
