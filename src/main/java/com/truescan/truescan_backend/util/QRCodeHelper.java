@@ -29,6 +29,7 @@ public class QRCodeHelper {
             byte[] qrBytes = generateQRCodeImage(payload, width, height);
             return Base64.getEncoder().encodeToString(qrBytes);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to generate QR Code", e);
         }
     }

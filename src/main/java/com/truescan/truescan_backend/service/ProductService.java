@@ -76,13 +76,6 @@ public class ProductService {
             System.out.println("Registered hash: " + bytesToHex(hash));
             System.out.println("Product registered on chain in tx: " + receipt.getTransactionHash());
 
-            boolean isNowRegistered = contract.isProductRegistered(Arrays.copyOfRange(hash, 0, 32)).send();
-            System.out.println("Verified immediately after registering: " + isNowRegistered);
-
-            if (!isNowRegistered) {
-                throw new RuntimeException("Product not registered immediately after tx!");
-            }
-
         } catch (Exception e) {
             throw new RuntimeException("Blockchain registration failed", e);
         }

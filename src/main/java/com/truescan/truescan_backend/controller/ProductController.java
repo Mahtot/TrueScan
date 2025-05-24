@@ -49,6 +49,7 @@ public class ProductController {
                     new ErrorResponse("DUPLICATE_SERIAL", e.getMessage())
             );
         } catch (Exception e) {
+
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("QR_GENERATION_FAILED", "Failed to generate QR code.")
             );
