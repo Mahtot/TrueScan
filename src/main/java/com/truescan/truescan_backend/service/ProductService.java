@@ -12,6 +12,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import com.truescan.truescan_backend.model.Product;
 
@@ -48,8 +49,10 @@ public class ProductService {
     }
 
     @PostConstruct
-    private void init() {
+    private void init() throws IOException {
         this.web3j = Web3j.build(new HttpService("https://sepolia.infura.io/v3/e749827f832b46278476e9266b39ed84"));
+
+        System.out.println("Connected to Ethereum client version: " + web3j.web3ClientVersion().send().getWeb3ClientVersion());
         Credentials credentials = Credentials.create(PRIVATE_KEY);
         this.contract = ProductVerifier.load(CONTRACT_ADDRESS, web3j, credentials, new DefaultGasProvider());
     }
