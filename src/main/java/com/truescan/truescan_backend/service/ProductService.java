@@ -73,22 +73,17 @@ public class ProductService {
             if (!receipt.isStatusOK()) {
                 throw new RuntimeException("Blockchain transaction failed: " + receipt.getStatus());
             }
-
             System.out.println("Registered hash: " + bytesToHex(hash));
             System.out.println("Product registered on chain in tx: " + receipt.getTransactionHash());
-            System.out.println("Tx block number: " + receipt.getBlockNumber());
 
-            // Retry verification after small delays
-            int attempts = 3;
             boolean isNowRegistered = false;
-            for (int i = 0; i < attempts; i++) {
+            try {
                 isNowRegistered = contract.isProductRegistered(Arrays.copyOfRange(hash, 0, 32)).send();
-                System.out.println("Verification attempt " + (i + 1) + ": " + isNowRegistered);
-
-                if (isNowRegistered) break;
-
-                Thread.sleep(2000); // Wait 2 seconds before retrying
+            } catch (Exception ex) {
+                System.err.println("Error checking product registration: " + ex.getMessage());
+                // Optionally rethrow or handle gracefully
             }
+            System.out.println("Verified immediately after registering: " + isNowRegistered);
 
             if (!isNowRegistered) {
                 throw new RuntimeException("Product not registered immediately after tx!");
@@ -97,7 +92,6 @@ public class ProductService {
         } catch (Exception e) {
             throw new RuntimeException("Blockchain registration failed", e);
         }
-
 
         product.setRegisteredAt(LocalDateTime.now());
         product.setAuthentic(true);
@@ -182,9 +176,14 @@ public Optional<Product> verifyProductFromQRCode(String serial, String timestamp
             System.out.println("Verified hash: " + bytesToHex(hash));
             System.out.println("Verifying on-chain for serial: " + serialNumber);
             System.out.println("Hash sent to contract: " + Arrays.toString(hash32));
+            try {
+                Boolean isValid = contract.isProductRegistered(hash32).send();
+                return isValid != null && isValid;
+            } catch (Exception e) {
+                System.out.println(e);
+                throw new RuntimeException(e);
+            }
 
-            Boolean isValid = contract.isProductRegistered(hash32).send();
-            return isValid != null && isValid;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
