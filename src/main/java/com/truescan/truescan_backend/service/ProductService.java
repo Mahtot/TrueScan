@@ -56,6 +56,7 @@ public class ProductService {
 
     public Product addProduct(Product product) {
         Optional<Product> existingProduct = repo.findBySerialNumber(product.getSerialNumber());
+        System.out.println("Using contract address: " + contract.getContractAddress());
 
         if (existingProduct.isPresent()) {
             throw new IllegalArgumentException("Product with this serial number already exists.");
@@ -154,6 +155,8 @@ public Optional<Product> verifyProductFromQRCode(String serial, String timestamp
         return repo.findAll();
     }
     public boolean verifyProductOnChain(String serialNumber) {
+        System.out.println("Using contract address: " + contract.getContractAddress());
+
         try {
             byte[] hash = Hash.sha3(serialNumber.getBytes(StandardCharsets.UTF_8));
             byte[] hash32 = Arrays.copyOfRange(hash, 0, 32);
