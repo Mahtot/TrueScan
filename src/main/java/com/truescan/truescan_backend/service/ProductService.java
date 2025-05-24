@@ -72,6 +72,7 @@ public class ProductService {
             if (!receipt.isStatusOK()) {
                 throw new RuntimeException("Blockchain transaction failed: " + receipt.getStatus());
             }
+            System.out.println(hash);
             System.out.println("Product registered on chain in tx: " + receipt.getTransactionHash());
 
         } catch (Exception e) {
@@ -148,7 +149,12 @@ public Optional<Product> verifyProductFromQRCode(String serial, String timestamp
     public boolean verifyProductOnChain(String serialNumber) {
         try {
             byte[] hash = Hash.sha3(serialNumber.getBytes(StandardCharsets.UTF_8));
-            Boolean isValid = contract.isProductRegistered(Arrays.copyOfRange(hash, 0, 32)).send();
+            byte[] hash32 = Arrays.copyOfRange(hash, 0, 32);
+            System.out.println(hash32);
+            System.out.println("Verifying on-chain for serial: " + serialNumber);
+            System.out.println("Hash sent to contract: " + Arrays.toString(hash32));
+
+            Boolean isValid = contract.isProductRegistered(hash32).send();
             return isValid != null && isValid;
         } catch (Exception e) {
             e.printStackTrace();
