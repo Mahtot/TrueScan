@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.web3j.crypto.Hash;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.TransactionManager;
@@ -66,7 +67,13 @@ public class ProductService {
             byte[] hash = Hash.sha3(dataToHash.getBytes(StandardCharsets.UTF_8));
 
             // Register on blockchain
-            contract.registerProduct(Arrays.copyOfRange(hash, 0, 32)).send();
+            TransactionReceipt receipt = contract.registerProduct(Arrays.copyOfRange(hash, 0, 32)).send();
+
+            if (!receipt.isStatusOK()) {
+                throw new RuntimeException("Blockchain transaction failed: " + receipt.getStatus());
+            }
+            System.out.println("Product registered on chain in tx: " + receipt.getTransactionHash());
+
         } catch (Exception e) {
             throw new RuntimeException("Blockchain registration failed", e);
         }

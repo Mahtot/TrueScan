@@ -162,7 +162,7 @@ private QRCodeHelper qrCodeHelper;
         );
 
         if (product.isPresent()) {
-            // Now verify on-chain using smart contract
+            // verify on-chain using smart contract
             boolean isOnChainValid = service.verifyProductOnChain(request.getSerial());
 
             if (isOnChainValid) {
