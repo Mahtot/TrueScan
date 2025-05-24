@@ -64,6 +64,10 @@ public class ProductVerifier extends Contract {
     }
 
     public RemoteFunctionCall<Boolean> isProductRegistered(byte[] productHash) {
+        if (productHash == null || productHash.length != 32) {
+            throw new IllegalArgumentException("productHash must be exactly 32 bytes long");
+        }
+
         Function function = new Function(
                 FUNC_ISPRODUCTREGISTERED,
                 Collections.singletonList(new Bytes32(productHash)),
@@ -71,6 +75,7 @@ public class ProductVerifier extends Contract {
         );
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
+
 
     // Event methods
     public static List<ProductRegisteredEventResponse> getProductRegisteredEvents(TransactionReceipt receipt) {

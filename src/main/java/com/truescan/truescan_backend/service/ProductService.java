@@ -67,18 +67,19 @@ public class ProductService {
             String dataToHash = product.getSerialNumber();
             byte[] fullHash = Hash.sha3(dataToHash.getBytes(StandardCharsets.UTF_8));
 
+            // Print the hash as hex (with 0x prefix for clarity!)
+            String hexHash = "0x" + bytesToHex(fullHash);
+
             if (fullHash.length != 32) {
                 throw new RuntimeException("Hash length is not 32 bytes! Length: " + fullHash.length);
             }
 
-            byte[] hash = Arrays.copyOfRange(fullHash, 0, 32); // should be the same but safe
-
             System.out.println("Data to hash: " + dataToHash);
-            System.out.println("SHA3 hash (hex): " + bytesToHex(hash));
-            System.out.println("Hash length: " + hash.length);
+            System.out.println("SHA3 hash (hex with 0x): " + hexHash);
+            System.out.println("Hash length: " + fullHash.length);
 
             // Register on blockchain
-            TransactionReceipt receipt = contract.registerProduct(hash).send();
+            TransactionReceipt receipt = contract.registerProduct(fullHash).send();
 
             if (!receipt.isStatusOK()) {
                 throw new RuntimeException("Blockchain transaction failed: " + receipt.getStatus());
@@ -95,12 +96,15 @@ public class ProductService {
             for (int i = 0; i < maxRetries; i++) {
                 try {
                     System.out.println("Checking registration status, attempt " + (i + 1));
-                    isNowRegistered = contract.isProductRegistered(hash).send();
+
+                    // Double-check what you're passing here!
+                    // We pass fullHash (32 bytes) directly
+                    isNowRegistered = contract.isProductRegistered(fullHash).send();
 
                     System.out.println("Verified after attempt " + (i + 1) + ": " + isNowRegistered);
 
                     if (isNowRegistered) {
-                        break; // success
+                        break; // success!
                     }
                 } catch (Exception ex) {
                     System.err.println("Error checking product registration on attempt " + (i + 1) + ": " + ex.getMessage());
@@ -114,10 +118,12 @@ public class ProductService {
                 throw new RuntimeException("Product not registered after " + maxRetries + " attempts!");
             }
 
+            System.out.println("✅ Product successfully registered and verified!");
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Blockchain registration failed", e);
         }
+
 
         product.setRegisteredAt(LocalDateTime.now());
         product.setAuthentic(true);
